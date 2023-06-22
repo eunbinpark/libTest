@@ -35,7 +35,7 @@ public class LibraryDAO {
 			user.setUserId(userId);
 			user.setUserState(rs.getString(1));
 			user.setAvailableBook(rs.getInt(2));
-			//user.setServiceStop(rs.getTimestamp(3));
+			user.setServiceStop(rs.getTimestamp(3));
 		}
 		
 		manager.closeConnection(rs, pstmt, con);
