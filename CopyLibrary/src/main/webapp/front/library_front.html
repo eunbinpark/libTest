@@ -34,7 +34,7 @@
             $('#list').on('click',function(){
                 console.log('work');
                 $.ajax({
-                	url : '/CopyLibrary/bookService?userId='+$('#userId').val(),
+                	url : '/LibraryCopy/bookService?userId='+$('#userId').val(),
                 	//url : '/CopyLibrary/bookService',
                 	type : 'get',
                 	success : function(info){
@@ -118,7 +118,7 @@
                 		bookNum : $("#bookNum").val(),
                 		toggle : 1
                 	},
-                	url : '/CopyLibrary/bookService',
+                	url : '/LibraryCopy/bookService',
                 	type : 'post',
                 	success : function(info){
                 		console.log(info);
@@ -205,7 +205,7 @@
                 		bookNum : $("#bookNum").val(),
                 		toggle : 2
                 	},
-                	url : '/CopyLibrary/bookService',
+                	url : '/LibraryCopy/bookService',
                 	type : 'post',
                 	success : function(info){
                 		console.log(info);
