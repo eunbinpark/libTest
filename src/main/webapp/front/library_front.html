@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Service</title>
+    <style>
+        table, td {
+            border : 1px solid black;
+            border-collapse: collapse;
+            position: relative;
+            margin: 10px 150px;
+        }
+
+        td {
+            width : 100px;
+            height: 40px;
+            text-align: center;
+        }
+        td.book_title {
+            width: 200px;
+        }
+        span {
+            margin-left: 150px;
+        }
+        div {
+            margin-bottom: 20px;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+   <script>
+        $(document).ready(function(){
+            $('#list').on('click',function(){
+                console.log('work');
+                $.ajax({
+                	url : '/CopyLibrary/bookService?userId='+$('#userId').val(),
+                	//url : '/CopyLibrary/bookService',
+                	type : 'get',
+                	success : function(info){
+                		console.log(info);
+                        let data = (JSON.parse(info));
+                        
+                        user_data = data.data.userInfo;
+
+                        $('#user_status').html(' <tr><td>대출도서</td><td>반납도서</td><td>미반납도서</td><td>반납예정도서</td><td>대출가능권수</td><td>이용상태</td><td>대출정지기간</td></tr>');
+                        $('#total').html('<tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>');
+                        $('#returned').html('<tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>');
+                        $('#not_returned').html('<tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>');
+                        $('#expecting_return').html('<tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>');
+                   
+                        let user = user_data.user[0];
+
+
+                        let userStatus = `<tr><td>${user.totalUsingBook-user.returnedBook}</td><td>${user.returnedBook}</td><td>${user.notReturnedBook}</td>
+                          <td>${user.expectingReturnBook}</td><td>${user.availableBook-(user.totalUsingBook-user.returnedBook)}</td><td>${user.userState}</td><td>${user.stopDate}</td></tr>`;
+                        $('#user_status').html($('#user_status').html()+userStatus);  
+                        
+                        $("#able_num").val(user.availableBook-(user.totalUsingBook-user.returnedBook));
+                      	$("#able_status").val(user.userState);
+                      	$("#user_rent").val(user.totalUsingBook-user.returnedBook);
+                        
+                        let book_data = data.data.bookInfo;
+                        
+                        let expectingList = book_data.expectingReturn;
+
+                        let list = book_data.list;
+                        let returnedList = book_data.returned;
+                        let notReturnedList = book_data.notReturned;
+                        
+                       
+                        for(let book of list ){
+                          let temp1 = `<tr><td>${book.bookIsbn}</td><td>${book.bookTitle}</td><td>${book.bookAuthor}</td>
+                              <td>${book.borrowStart}</td><td>${book.borrowEnd}</td><td>${book.returnDate}</td></tr>`;
+                          $('#total').html($('#total').html()+temp1);  
+                        }
+
+                        for(let book of returnedList ){
+                          let temp1 = `<tr><td>${book.bookIsbn}</td><td>${book.bookTitle}</td><td>${book.bookAuthor}</td>
+                              <td>${book.borrowStart}</td><td>${book.borrowEnd}</td><td>${book.returnDate}</td></tr>`;
+                          $('#returned').html($('#returned').html()+temp1);  
+                        }
+
+                        for(let book of notReturnedList ){
+                          let temp1 = `<tr><td>${book.bookIsbn}</td><td>${book.bookTitle}</td><td>${book.bookAuthor}</td>
+                              <td>${book.borrowStart}</td><td>${book.borrowEnd}</td><td>${book.returnDate}</td></tr>`;
+                          $('#not_returned').html($('#not_returned').html()+temp1);  
+                        }
+
+                        for(let book of expectingList ){
+                          let temp1 = `<tr><td>${book.bookIsbn}</td><td>${book.bookTitle}</td><td>${book.bookAuthor}</td>
+                              <td>${book.borrowStart}</td><td>${book.borrowEnd}</td><td>${book.returnDate}</td></tr>`;
+                          $('#expecting_return').html($('#expecting_return').html()+temp1);  
+                        }
+
+                	},
+                	error : function(error){
+                		
+                	},
+                	complete : function(){
+                		
+                	}
+            
+                });
+
+                console.log('end work');
+        	});
+			
+            $('#rentbtn').on('click',function(){
+             	if($("#able_num").val() < 1 || $("#able_status").val()!="정상") {
+            		alert("대출 불가");
+            		return false;
+            	}
+            	console.log('work');
+                $.ajax({
+                	data:{
+                		userId : $("#userId").val(),
+                		bookNum : $("#bookNum").val(),
+                		toggle : 1
+                	},
+                	url : '/CopyLibrary/bookService',
+                	type : 'post',
+                	success : function(info){
+                		console.log(info);
+                        let data = (JSON.parse(info));
+                        
+                        user_data = data.data.userInfo;
+
+                        $('#user_status').html(' <tr><td>대출도서</td><td>반납도서</td><td>미반납도서</td><td>반납예정도서</td><td>대출가능권수</td><td>이용상태</td><td>대출정지기간</td></tr>');
+                        $('#total').html('<tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>');
+                        $('#returned').html('<tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>');
+                        $('#not_returned').html('<tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>');
+                        $('#expecting_return').html('<tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>');
+                   
+                        let user = user_data.user[0];
+
+                        let userStatus = `<tr><td>${user.totalUsingBook-user.returnedBook}</td><td>${user.returnedBook}</td><td>${user.notReturnedBook}</td>
+                            <td>${user.expectingReturnBook}</td><td>${user.availableBook-(user.totalUsingBook-user.returnedBook)}</td><td>${user.userState}</td><td>${user.stopDate}</td></tr>`;
+                        $('#user_status').html($('#user_status').html()+userStatus);  
+                        
+                        $("#able_num").val(user.availableBook-(user.totalUsingBook-user.returnedBook));
+                      	$("#able_status").val(user.userState);
+                      	$("#user_rent").val(user.totalUsingBook-user.returnedBook);
+                        
+               
+                      	
+                        let book_data = data.data.bookInfo;
+                        
+                        let expectingList = book_data.expectingReturn;
+
+                        let list = book_data.list;
+                        let returnedList = book_data.returned;
+                        let notReturnedList = book_data.notReturned;
+                        
+                       
+                        for(let book of list ){
+                          let temp1 = `<tr><td>${book.bookIsbn}</td><td>${book.bookTitle}</td><td>${book.bookAuthor}</td>
+                              <td>${book.borrowStart}</td><td>${book.borrowEnd}</td><td>${book.returnDate}</td></tr>`;
+                          $('#total').html($('#total').html()+temp1);  
+                        }
+
+                        for(let book of returnedList ){
+                          let temp1 = `<tr><td>${book.bookIsbn}</td><td>${book.bookTitle}</td><td>${book.bookAuthor}</td>
+                              <td>${book.borrowStart}</td><td>${book.borrowEnd}</td><td>${book.returnDate}</td></tr>`;
+                          $('#returned').html($('#returned').html()+temp1);  
+                        }
+
+                        for(let book of notReturnedList ){
+                          let temp1 = `<tr><td>${book.bookIsbn}</td><td>${book.bookTitle}</td><td>${book.bookAuthor}</td>
+                              <td>${book.borrowStart}</td><td>${book.borrowEnd}</td><td>${book.returnDate}</td></tr>`;
+                          $('#not_returned').html($('#not_returned').html()+temp1);  
+                        }
+
+                        for(let book of expectingList ){
+                          let temp1 = `<tr><td>${book.bookIsbn}</td><td>${book.bookTitle}</td><td>${book.bookAuthor}</td>
+                              <td>${book.borrowStart}</td><td>${book.borrowEnd}</td><td>${book.returnDate}</td></tr>`;
+                          $('#expecting_return').html($('#expecting_return').html()+temp1);  
+                        }
+
+                	},
+                	error : function(error){
+                		
+                	},
+                	complete : function(){
+                		
+                	}
+            
+                });
+
+                console.log('end work');
+        	});
+
+            
+
+            $('#returnbtn').on('click',function(){
+             	if($("#user_rent").val() <1) {
+            		alert("반납할 책이 없습니다.");
+            		return false;
+            	}
+           
+            	console.log('work');
+                $.ajax({
+                	data:{
+                		userId : $("#userId").val(),
+                		bookNum : $("#bookNum").val(),
+                		toggle : 2
+                	},
+                	url : '/CopyLibrary/bookService',
+                	type : 'post',
+                	success : function(info){
+                		console.log(info);
+                        let data = (JSON.parse(info));
+                        
+                        user_data = data.data.userInfo;
+
+                        $('#user_status').html(' <tr><td>대출도서</td><td>반납도서</td><td>미반납도서</td><td>반납예정도서</td><td>대출가능권수</td><td>이용상태</td><td>대출정지기간</td></tr>');
+                        $('#total').html('<tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>');
+                        $('#returned').html('<tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>');
+                        $('#not_returned').html('<tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>');
+                        $('#expecting_return').html('<tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>');
+                   
+                        let user = user_data.user[0];
+
+                        let userStatus = `<tr><td>${user.totalUsingBook-user.returnedBook}</td><td>${user.returnedBook}</td><td>${user.notReturnedBook}</td>
+                          <td>${user.expectingReturnBook}</td><td>${user.availableBook-(user.totalUsingBook-user.returnedBook)}</td><td>${user.userState}</td><td>${user.stopDate}</td></tr>`;
+                        $('#user_status').html($('#user_status').html()+userStatus);  
+                      
+                        $("#able_num").val(user.availableBook-(user.totalUsingBook-user.returnedBook));
+                      	$("#able_status").val(user.userState);
+                      	$("#user_rent").val(user.totalUsingBook-user.returnedBook);
+                        
+                        
+                        let book_data = data.data.bookInfo;
+                        
+                        let expectingList = book_data.expectingReturn;
+
+                        let list = book_data.list;
+                        let returnedList = book_data.returned;
+                        let notReturnedList = book_data.notReturned;
+                        
+                       
+                        for(let book of list ){
+                          let temp1 = `<tr><td>${book.bookIsbn}</td><td>${book.bookTitle}</td><td>${book.bookAuthor}</td>
+                              <td>${book.borrowStart}</td><td>${book.borrowEnd}</td><td>${book.returnDate}</td></tr>`;
+                          $('#total').html($('#total').html()+temp1);  
+                        }
+
+                        for(let book of returnedList ){
+                          let temp1 = `<tr><td>${book.bookIsbn}</td><td>${book.bookTitle}</td><td>${book.bookAuthor}</td>
+                              <td>${book.borrowStart}</td><td>${book.borrowEnd}</td><td>${book.returnDate}</td></tr>`;
+                          $('#returned').html($('#returned').html()+temp1);  
+                        }
+
+                        for(let book of notReturnedList ){
+                          let temp1 = `<tr><td>${book.bookIsbn}</td><td>${book.bookTitle}</td><td>${book.bookAuthor}</td>
+                              <td>${book.borrowStart}</td><td>${book.borrowEnd}</td><td>${book.returnDate}</td></tr>`;
+                          $('#not_returned').html($('#not_returned').html()+temp1);  
+                        }
+
+                        for(let book of expectingList ){
+                          let temp1 = `<tr><td>${book.bookIsbn}</td><td>${book.bookTitle}</td><td>${book.bookAuthor}</td>
+                              <td>${book.borrowStart}</td><td>${book.borrowEnd}</td><td>${book.returnDate}</td></tr>`;
+                          $('#expecting_return').html($('#expecting_return').html()+temp1);  
+                        }
+
+                	},
+                	error : function(error){
+                		
+                	},
+                	complete : function(){
+                		
+                	}
+            
+                });
+
+                console.log('end work');
+        	});
+
+        });
+        
+   </script>
+<body>
+    <div style= "margin-left: 150px;">
+    	<input type="hidden" id="able_num"/><input type="hidden" id="able_status"/><input type="hidden" id="user_rent"/>
+    	<input type="text" id="userId" placeholder="유저 아이디 입력">
+        <button id="list">유저 정보</button>
+        <input type="text" id="bookNum" placeholder="책 번호 입력">
+        <button id="rentbtn">대출</button>
+        <button id="returnbtn">반납</button>
+        
+    </div>
+    <div id="container">
+    <div>
+        <table id="user_status">
+        <tr><td>대출도서</td><td>반납도서</td><td>미반납도서</td><td>반납예정도서</td><td>대출가능권수</td><td>이용상태</td><td>대출정지기간</td></tr>
+        
+    </table>
+    </div>
+    <br>
+    <div>
+        <span>전체도서목록</span>
+        <table id="total">
+            <tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>
+        </table>
+    </div>
+
+    <div>
+        <span>전체반납목록</span>
+        <table id="returned">
+            <tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>
+        </table>
+    </div>
+    <div>
+        <span>미반납목록</span>
+        <table id="not_returned">
+            <tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>
+        </table>
+    </div>
+    <div>
+        <span>반납예정목록</span>
+        <table id="expecting_return">
+            <tr><td>도서번호</td><td class="book_title">도서명</td><td>저자</td><td>대출일자</td><td>반납기한</td><td>반납일자</td></tr>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
