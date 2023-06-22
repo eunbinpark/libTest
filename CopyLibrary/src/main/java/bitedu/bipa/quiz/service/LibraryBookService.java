@@ -2,7 +2,6 @@ package bitedu.bipa.quiz.service;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -101,9 +100,7 @@ public class LibraryBookService {
 		}
 		
 		Calendar criteriaDate = Calendar.getInstance();
-		LocalDate now = LocalDate.now();
-		
-		criteriaDate.set(now.getYear(), now.getMonthValue(), now.getDayOfMonth());
+		criteriaDate.set(Calendar.HOUR_OF_DAY,0);
 		ArrayList<BookUseStatusVO> allReturned = this.getReturnedBooks(list);
 		ArrayList<BookUseStatusVO> notReturned = this.getNotReturnedBooks(list, criteriaDate);
 		ArrayList<BookUseStatusVO> expectingReturn = this.getExpectingReturnBooks(list,criteriaDate);
